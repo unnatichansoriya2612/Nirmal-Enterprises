@@ -48,3 +48,5 @@ app.listen(PORT, () => {
     `Nirmal Enterprises backend running on port ${PORT}`
   );
 });
+
+export default app;
