@@ -1,0 +1,25 @@
+### ============================================================
+### Nirmal Enterprises API Testing
+### Click "Send Request" above any URL to test it directly!
+### (Zero logins, no accounts, completely free)
+### ============================================================
+
+@baseUrl = http://localhost:5000
+
+### 1. Root Endpoint Test
+GET {{baseUrl}}/
+
+### 2. API Health Check
+GET {{baseUrl}}/api/health
+
+### 3. Get All Products (Public)
+GET {{baseUrl}}/api/products
+
+### 4. Auth - Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "password123"
+}

@@ -1,0 +1,125 @@
+.customer-settings-page {
+  width: min(1000px, calc(100% - 40px));
+  margin: 40px auto 80px;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 40px;
+  color: #1f2933;
+}
+
+.settings-sidebar {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  height: fit-content;
+}
+
+.settings-tab {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 24px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #526b6d;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.settings-tab:hover {
+  background: #f7faf9;
+  color: #245b63;
+}
+
+.settings-tab.active {
+  color: #245b63;
+  font-weight: 700;
+  border-left-color: #245b63;
+  background: #f0f6f5;
+}
+
+.settings-content {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.settings-content h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  color: #1f2933;
+}
+
+.settings-content p.settings-desc {
+  color: #526b6d;
+  margin: 0 0 30px;
+  font-size: 14px;
+}
+
+.settings-form-group {
+  margin-bottom: 20px;
+}
+
+.settings-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #245b63;
+  margin-bottom: 8px;
+}
+
+.settings-form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #dce9e7;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  background: #fcfcfc;
+}
+
+.settings-form-group input:focus {
+  outline: none;
+  border-color: #245b63;
+  background: #ffffff;
+}
+
+.settings-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.customer-primary-button.save-btn {
+  padding: 0 24px;
+  min-height: 44px;
+}
+
+@media (max-width: 768px) {
+  .customer-settings-page {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .settings-sidebar {
+    display: flex;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  .settings-tab {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    padding: 10px 16px;
+    white-space: nowrap;
+  }
+  .settings-tab.active {
+    border-left-color: transparent;
+    border-bottom-color: #245b63;
+  }
+  .settings-content {
+    padding: 24px;
+  }
+}

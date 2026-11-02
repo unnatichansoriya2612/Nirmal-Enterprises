@@ -1,0 +1,7 @@
+node_modules/
+nirmal-enterprises.zip
+.env
+.env.*
+*.log
+dist/
+.DS_Store

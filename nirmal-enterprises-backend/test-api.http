@@ -1,0 +1,102 @@
+@baseUrl = http://localhost:5000
+
+### 1. Root Endpoint Test
+GET {{baseUrl}}/
+
+### 2. API Health Check
+GET {{baseUrl}}/api/health
+
+### 3. Get All Products (Public)
+GET {{baseUrl}}/api/products
+
+### 4. Admin Login (Gets Admin Token)
+# @name adminLogin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nirmalenterprises0205@gmail.com",
+  "password": "nirmalenterprises@7974"
+}
+
+### 5. Check Admin Access
+@adminToken = {{adminLogin.response.body.data.session.access_token}}
+GET {{baseUrl}}/api/auth/admin-check
+Authorization: Bearer {{adminToken}}
+
+### 6. View All Customers (Admin Only)
+GET {{baseUrl}}/api/auth/customers
+Authorization: Bearer {{adminToken}}
+
+### 7. Customer Registration
+# @name customerRegister
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Pooja Verma",
+  "mobile": "9811223344",
+  "email": "pooja.verma@example.com",
+  "address": "B-12, Vijay Nagar, Jabalpur, MP",
+  "password": "customerpass123"
+}
+
+### 8. Customer Login using Mobile Number
+# @name customerLogin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "mobile": "9811223344",
+  "password": "customerpass123"
+}
+
+### 9. Get Customer Profile (/me)
+@customerToken = {{customerLogin.response.body.data.session.access_token}}
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{customerToken}}
+
+### 10. Book an RO Service Visit (NEW!)
+# @name bookService
+POST {{baseUrl}}/api/services
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "customer_name": "Pooja Verma",
+  "customer_phone": "9811223344",
+  "service_address": "B-12, Vijay Nagar, Jabalpur, MP",
+  "service_name": "Water Leakage Repair",
+  "service_date": "2026-11-06",
+  "problem": "Water is dripping from the bottom sediment filter",
+  "notes": "Please call 30 mins before reaching",
+  "total_amount": 450
+}
+
+### 11. View My Service History (Customer)
+GET {{baseUrl}}/api/services/my-services
+Authorization: Bearer {{customerToken}}
+
+### 12. View All Services (Admin Only)
+GET {{baseUrl}}/api/services
+Authorization: Bearer {{adminToken}}
+
+### 13. Update Service Ticket (Admin Only: Assign Technician)
+@serviceId = {{bookService.response.body.data.id}}
+PATCH {{baseUrl}}/api/services/{{serviceId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "technician_name": "Ramesh Kumar",
+  "booking_status": "In Progress",
+  "notes": "Technician dispatched with spare sediment filter."
+}
+
+### 14. Get Inventory (Admin Only)
+GET {{baseUrl}}/api/inventory
+Authorization: Bearer {{adminToken}}
+
+### 15. Get All Orders (Admin Only)
+GET {{baseUrl}}/api/orders
+Authorization: Bearer {{adminToken}}
