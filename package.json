@@ -2,6 +2,13 @@
   "name": "nirmal-enterprises-fullstack",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "nirmal-enterprises",
+    "nirmal-enterprises-backend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=nirmal-enterprises"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "cors": "^2.8.5",
