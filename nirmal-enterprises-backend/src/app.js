@@ -12,7 +12,6 @@ import serviceRoutes from "./routes/serviceRoutes.js";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
@@ -42,11 +41,5 @@ app.use("/api/auth", authRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/services", serviceRoutes);
-
-app.listen(PORT, () => {
-  console.log(
-    `Nirmal Enterprises backend running on port ${PORT}`
-  );
-});
 
 export default app;

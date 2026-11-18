@@ -38,6 +38,9 @@ function InvoicePreview({
               <p>
                 RO Service & Water Purifier Solutions
               </p>
+              <p style={{ fontSize: '12px', color: '#526b6d', margin: '4px 0 0' }}>
+                Phone / WhatsApp: +91 9329688963
+              </p>
             </div>
 
             <div className="invoice-number">
@@ -151,7 +154,7 @@ function InvoicePreview({
 
           <div className="invoice-footer">
             <p>
-              Thank you for choosing Nirmal Enterprises.
+              Thank you for choosing Nirmal Enterprises. Call / WhatsApp: +91 9329688963
             </p>
 
             <p>

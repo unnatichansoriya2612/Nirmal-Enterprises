@@ -29,6 +29,11 @@ function Settings() {
             <span>Panel Access</span>
             <strong>Owner / Administrator</strong>
           </div>
+
+          <div className="settings-row">
+            <span>Phone &amp; WhatsApp</span>
+            <strong>+91 9329688963</strong>
+          </div>
         </div>
 
         <div className="settings-card">

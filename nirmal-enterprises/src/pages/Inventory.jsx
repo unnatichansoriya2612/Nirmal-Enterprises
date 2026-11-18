@@ -1,8 +1,23 @@
 import { useState } from "react";
 
-function Inventory({ products, setProducts }) {
+function Inventory({ products = [], setProducts = () => {} }) {
   const [showForm, setShowForm] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
+
+  // Safe fallback to prevent 0 or empty product list if parent has transient empty state
+  const safeProducts =
+    Array.isArray(products) && products.length > 0
+      ? products
+      : (() => {
+          try {
+            const saved = localStorage.getItem("nirmal_products");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+          } catch {}
+          return [];
+        })();
 
   const [productName, setProductName] = useState("");
   const [productType, setProductType] = useState("Complete RO");
@@ -111,9 +126,9 @@ function Inventory({ products, setProducts }) {
         ...productData,
       };
 
-      setProducts([...products, newProduct]);
+      setProducts([...safeProducts, newProduct]);
     } else {
-      const updatedProducts = products.map((product) =>
+      const updatedProducts = safeProducts.map((product) =>
         product.id === editingProductId
           ? {
               ...product,
@@ -153,11 +168,11 @@ function Inventory({ products, setProducts }) {
     }
 
     setProducts(
-      products.filter((product) => product.id !== id)
+      safeProducts.filter((product) => product.id !== id)
     );
   };
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = safeProducts.filter((product) => {
     const search = searchTerm.toLowerCase();
 
     const matchesSearch =
@@ -171,9 +186,9 @@ function Inventory({ products, setProducts }) {
     return matchesSearch && matchesType;
   });
 
-  const lowStockProducts = products.filter(
+  const lowStockProducts = safeProducts.filter(
     (product) =>
-      product.currentStock <= product.minimumStock
+      Number(product.currentStock || 0) <= Number(product.minimumStock || 0)
   );
 
   return (
@@ -199,14 +214,14 @@ function Inventory({ products, setProducts }) {
       <div className="inventory-summary">
         <div className="summary-card">
           <span>Total Products</span>
-          <strong>{products.length}</strong>
+          <strong>{safeProducts.length}</strong>
         </div>
 
         <div className="summary-card">
           <span>Complete RO</span>
           <strong>
             {
-              products.filter(
+              safeProducts.filter(
                 (product) =>
                   product.type === "Complete RO"
               ).length
@@ -218,7 +233,7 @@ function Inventory({ products, setProducts }) {
           <span>Spare Parts</span>
           <strong>
             {
-              products.filter(
+              safeProducts.filter(
                 (product) =>
                   product.type === "Spare Part"
               ).length
@@ -463,7 +478,7 @@ function Inventory({ products, setProducts }) {
           </select>
         </div>
 
-        {products.length === 0 ? (
+        {safeProducts.length === 0 ? (
           <div className="empty-state">
             <h3>No products added yet.</h3>
 

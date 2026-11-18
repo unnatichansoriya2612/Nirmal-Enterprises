@@ -1,9 +1,76 @@
+import { useState, useEffect } from "react";
+import api from "../services/api";
+
 function Dashboard({
-  customers,
-  services,
-  products,
-  sales,
+  customers = [],
+  services = [],
+  products = [],
+  sales = [],
 }) {
+  // Self-resilient product state: uses prop, falls back to localStorage cache
+  const [localProducts, setLocalProducts] = useState(() => {
+    if (Array.isArray(products) && products.length > 0) return products;
+    try {
+      const saved = localStorage.getItem("nirmal_products");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn("Could not read nirmal_products from cache", e);
+    }
+    return [];
+  });
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Sync with prop whenever parent passes non-empty products
+  useEffect(() => {
+    if (Array.isArray(products) && products.length > 0) {
+      setLocalProducts(products);
+    }
+  }, [products]);
+
+  // Self-fetch function: Dashboard can fetch directly from API independently
+  const refreshProducts = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await api.products.getAll();
+      if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+        const normalized = res.data.map((item) => ({
+          id: item.id,
+          name: item.name,
+          category: item.category || "Complete RO",
+          type: item.type || (item.category?.toLowerCase().includes("spare") ? "Spare Part" : "Complete RO"),
+          sellingPrice: Number(item.price ?? item.sellingPrice ?? 0),
+          purchasePrice: Number(item.purchasePrice ?? Math.round((item.price ?? 0) * 0.7)),
+          currentStock: Number(item.currentStock ?? 10),
+          minimumStock: Number(item.minimumStock ?? 5),
+          is_active: item.is_active !== false,
+        }));
+        setLocalProducts(normalized);
+        localStorage.setItem("nirmal_products", JSON.stringify(normalized));
+      }
+    } catch (err) {
+      console.warn("Dashboard self-fetch fallback:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // If products are missing or empty on mount, fetch directly
+  useEffect(() => {
+    if (localProducts.length === 0) {
+      refreshProducts();
+    }
+  }, []);
+
+  // Safe active lists (never drops to 0 due to an empty prop)
+  const activeProducts =
+    Array.isArray(products) && products.length > 0
+      ? products
+      : localProducts;
+
   const totalSales = sales.reduce(
     (total, sale) =>
       total + Number(sale.totalAmount || 0),
@@ -23,9 +90,9 @@ function Dashboard({
     0
   );
 
-  const lowStockProducts = products.filter(
+  const lowStockProducts = activeProducts.filter(
     (product) =>
-      product.currentStock <= product.minimumStock
+      Number(product.currentStock || 0) <= Number(product.minimumStock || 0)
   );
 
   const servicePaymentsPending = services.reduce(
@@ -43,7 +110,7 @@ function Dashboard({
 
   return (
     <div className="dashboard-page">
-      <section className="page-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <section className="page-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <p className="eyebrow">BUSINESS OVERVIEW</p>
 
@@ -54,14 +121,28 @@ function Dashboard({
             Enterprises business activity.
           </p>
         </div>
-        
-        <button 
-          className="primary-button" 
-          onClick={() => window.print()}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <span style={{ fontSize: '18px' }}>📄</span> Print Report
-        </button>
+
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={refreshProducts}
+            disabled={isRefreshing}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <span>{isRefreshing ? "⏳" : "🔄"}</span>
+            {isRefreshing ? "Syncing..." : "Sync Products"}
+          </button>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => window.print()}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <span style={{ fontSize: '18px' }}>📄</span> Print Report
+          </button>
+        </div>
       </section>
 
       <section className="dashboard-stats">
@@ -79,7 +160,7 @@ function Dashboard({
 
         <div className="stat-card">
           <span>Products</span>
-          <strong>{products.length}</strong>
+          <strong>{activeProducts.length}</strong>
           <small>Products & spare parts</small>
         </div>
 
@@ -111,7 +192,7 @@ function Dashboard({
             </div>
           </div>
 
-          {products.length === 0 ? (
+          {activeProducts.length === 0 ? (
             <p className="empty-message">
               No products have been added yet.
             </p>
@@ -131,12 +212,12 @@ function Dashboard({
                     <strong>{product.name}</strong>
 
                     <span>
-                      Minimum: {product.minimumStock}
+                      Minimum: {product.minimumStock ?? 0}
                     </span>
                   </div>
 
                   <strong>
-                    {product.currentStock} left
+                    {product.currentStock ?? 0} left
                   </strong>
                 </div>
               ))}

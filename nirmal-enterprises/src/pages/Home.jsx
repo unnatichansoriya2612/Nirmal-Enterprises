@@ -1,14 +1,28 @@
 import { Link } from "react-router-dom";
 
 function Home({
-  customers,
-  services,
-  products,
-  sales,
+  customers = [],
+  services = [],
+  products = [],
+  sales = [],
 }) {
-  const lowStockProducts = products.filter(
+  const activeProducts =
+    Array.isArray(products) && products.length > 0
+      ? products
+      : (() => {
+          try {
+            const saved = localStorage.getItem("nirmal_products");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+          } catch {}
+          return [];
+        })();
+
+  const lowStockProducts = activeProducts.filter(
     (product) =>
-      product.currentStock <= product.minimumStock
+      Number(product.currentStock || 0) <= Number(product.minimumStock || 0)
   );
 
   const pendingPayments = [
@@ -62,7 +76,7 @@ function Home({
 
         <div className="quick-actions-grid">
           <Link
-            to="/customers"
+            to="/admin/customers"
             className="quick-action-card"
           >
             <div className="action-icon">♙</div>
@@ -76,7 +90,7 @@ function Home({
           </Link>
 
           <Link
-            to="/services"
+            to="/admin/services"
             className="quick-action-card"
           >
             <div className="action-icon">⚒</div>
@@ -90,7 +104,7 @@ function Home({
           </Link>
 
           <Link
-            to="/sales"
+            to="/admin/sales"
             className="quick-action-card"
           >
             <div className="action-icon">▤</div>
@@ -105,7 +119,7 @@ function Home({
           </Link>
 
           <Link
-            to="/sales"
+            to="/admin/inventory"
             className="quick-action-card"
           >
             <div className="action-icon">+</div>
@@ -124,7 +138,7 @@ function Home({
         <div className="overview-card">
           <span>Total Customers</span>
           <strong>{customers.length}</strong>
-          <Link to="/customers">
+          <Link to="/admin/customers">
             View customers →
           </Link>
         </div>
@@ -132,15 +146,15 @@ function Home({
         <div className="overview-card">
           <span>Active Services</span>
           <strong>{services.length}</strong>
-          <Link to="/services">
+          <Link to="/admin/services">
             View services →
           </Link>
         </div>
 
         <div className="overview-card">
           <span>Products</span>
-          <strong>{products.length}</strong>
-          <Link to="/sales">
+          <strong>{activeProducts.length}</strong>
+          <Link to="/admin/inventory">
             Manage products →
           </Link>
         </div>
@@ -148,7 +162,7 @@ function Home({
         <div className="overview-card">
           <span>Sales Recorded</span>
           <strong>{sales.length}</strong>
-          <Link to="/sales">
+          <Link to="/admin/sales">
             View sales →
           </Link>
         </div>

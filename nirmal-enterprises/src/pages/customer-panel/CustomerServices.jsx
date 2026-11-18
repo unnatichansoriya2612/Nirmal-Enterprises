@@ -5,7 +5,7 @@ import "./CustomerServices.css";
 function CustomerServices({ serviceCatalog, onBookService }) {
   const [selectedService, setSelectedService] = useState(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -34,7 +34,7 @@ function CustomerServices({ serviceCatalog, onBookService }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const booking = {
       id: "SRV-" + Math.floor(100000 + Math.random() * 900000),
       serviceId: selectedService.id,
@@ -53,9 +53,9 @@ function CustomerServices({ serviceCatalog, onBookService }) {
     if (onBookService) {
       onBookService(booking);
     }
-    
+
     setBookingSuccess(true);
-    
+
     // Auto close after 3 seconds
     setTimeout(() => {
       closeModal();
@@ -108,10 +108,10 @@ function CustomerServices({ serviceCatalog, onBookService }) {
                   <div className="customer-service-icon">+</div>
                   <span className="customer-service-status">Available</span>
                 </div>
-                
+
                 <h3>{service.name}</h3>
                 <p>{service.description}</p>
-                
+
                 <div className="customer-service-card-bottom">
                   <div className="customer-service-price">
                     <span>Service price</span>
@@ -121,7 +121,7 @@ function CustomerServices({ serviceCatalog, onBookService }) {
                         : "Price on request"}
                     </strong>
                   </div>
-                  
+
                   <button
                     onClick={() => openModal(service)}
                     className="customer-service-book-button"
@@ -145,13 +145,24 @@ function CustomerServices({ serviceCatalog, onBookService }) {
             you identify the right RO service.
           </p>
         </div>
-        <a 
-          href="tel:+919999999999" 
-          className="customer-services-call-button"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-        >
-          <span style={{ fontSize: '18px' }}>📞</span> Call Now
-        </a>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <a
+            href="tel:+919329688963"
+            className="customer-services-call-button"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            <span style={{ fontSize: '18px' }}>📞</span> Call Now
+          </a>
+          <a
+            href="https://wa.me/919329688963?text=Hello%20Nirmal%20Enterprises,%20I%20need%20help%20with%20RO%20services."
+            target="_blank"
+            rel="noreferrer"
+            className="customer-services-call-button"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#25D366', borderColor: '#25D366', color: '#fff' }}
+          >
+            <span style={{ fontSize: '18px' }}>💬</span> WhatsApp
+          </a>
+        </div>
       </section>
 
       {/* BOOKING MODAL */}
@@ -165,7 +176,7 @@ function CustomerServices({ serviceCatalog, onBookService }) {
               </div>
               <button className="customer-service-modal-close" onClick={closeModal}>×</button>
             </div>
-            
+
             <div className="customer-service-modal-body">
               {bookingSuccess ? (
                 <div className="customer-service-modal-success">
@@ -178,22 +189,22 @@ function CustomerServices({ serviceCatalog, onBookService }) {
                     <label>Full Name</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                   </div>
-                  
+
                   <div className="form-group" style={{ marginBottom: '16px' }}>
                     <label>Phone Number</label>
                     <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
                   </div>
-                  
+
                   <div className="form-group" style={{ marginBottom: '16px' }}>
                     <label>Complete Address</label>
                     <input type="text" name="address" value={formData.address} onChange={handleChange} required />
                   </div>
-                  
+
                   <div className="form-group" style={{ marginBottom: '24px' }}>
                     <label>Preferred Date</label>
                     <input type="date" name="preferredDate" value={formData.preferredDate} onChange={handleChange} required />
                   </div>
-                  
+
                   <button type="submit" className="customer-primary-button" style={{ width: '100%' }}>
                     Confirm Booking
                   </button>

@@ -186,7 +186,7 @@ function CustomerHome({ products, serviceCatalog }) {
 
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           <a
-            href="tel:+919999999999"
+            href="tel:+919329688963"
             className="customer-call-button"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
@@ -194,7 +194,7 @@ function CustomerHome({ products, serviceCatalog }) {
           </a>
 
           <a
-            href="https://wa.me/919999999999?text=Hello%20Nirmal%20Enterprises,%20I%20have%20an%20inquiry."
+            href="https://wa.me/919329688963?text=Hello%20Nirmal%20Enterprises,%20I%20have%20an%20inquiry."
             target="_blank"
             rel="noreferrer"
             className="customer-call-button"

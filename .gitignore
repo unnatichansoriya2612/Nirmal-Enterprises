@@ -5,3 +5,7 @@ nirmal-enterprises.zip
 *.log
 dist/
 .DS_Store
+*.zip
+zip_project_nirmal_enterprises/
+zip_project_nirmal_enterprises/
+/zip_project_nirmal_enterprises

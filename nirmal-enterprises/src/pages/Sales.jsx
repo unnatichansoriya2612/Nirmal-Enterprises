@@ -7,12 +7,27 @@ import SalesHistory from "../components/sales/SalesHistory";
 import InvoicePreview from "../components/sales/InvoicePreview";
 
 function Sales({
-  customers,
-  products,
-  sales,
-  setSales,
-  setProducts,
+  customers = [],
+  products = [],
+  sales = [],
+  setSales = () => {},
+  setProducts = () => {},
 }) {
+  // Safe fallback to prevent 0 or empty product list if parent has transient empty state
+  const safeProducts =
+    Array.isArray(products) && products.length > 0
+      ? products
+      : (() => {
+          try {
+            const saved = localStorage.getItem("nirmal_products");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+          } catch {}
+          return [];
+        })();
+
   const [showProductForm, setShowProductForm] =
     useState(false);
 
@@ -153,12 +168,12 @@ function Sales({
       };
 
       setProducts([
-        ...products,
+        ...safeProducts,
         newProduct,
       ]);
     } else {
       const updatedProducts =
-        products.map((product) => {
+        safeProducts.map((product) => {
           if (
             product.id === editingProductId
           ) {
@@ -178,7 +193,7 @@ function Sales({
   };
 
   const handleEditProduct = (id) => {
-    const product = products.find(
+    const product = safeProducts.find(
       (product) => product.id === id
     );
 
@@ -186,29 +201,29 @@ function Sales({
       return;
     }
 
-    setProductName(product.name);
-    setCategory(product.category);
-    setBrand(product.brand);
-    setModel(product.model);
-    setImageUrl(product.imageUrl);
-    setDescription(product.description);
+    setProductName(product.name || "");
+    setCategory(product.category || "RO Product");
+    setBrand(product.brand || "");
+    setModel(product.model || "");
+    setImageUrl(product.imageUrl || "");
+    setDescription(product.description || "");
     setSpecifications(
       String(product.specifications || "")
     );
     setPurchasePrice(
-      String(product.purchasePrice)
+      String(product.purchasePrice || "")
     );
     setSellingPrice(
-      String(product.sellingPrice)
+      String(product.sellingPrice || "")
     );
     setCurrentStock(
-      String(product.currentStock)
+      String(product.currentStock || "")
     );
     setMinimumStock(
-      String(product.minimumStock)
+      String(product.minimumStock || "")
     );
-    setWarranty(product.warranty);
-    setNotes(product.notes);
+    setWarranty(product.warranty || "");
+    setNotes(product.notes || "");
 
     setEditingProductId(id);
     setShowProductForm(true);
@@ -225,7 +240,7 @@ function Sales({
     }
 
     const updatedProducts =
-      products.filter(
+      safeProducts.filter(
         (product) => product.id !== id
       );
 
@@ -233,20 +248,18 @@ function Sales({
   };
 
   const filteredProducts =
-    products.filter((product) => {
+    safeProducts.filter((product) => {
       const search =
         searchTerm.toLowerCase();
 
+      const pName = (product.name || "").toLowerCase();
+      const pBrand = (product.brand || "").toLowerCase();
+      const pModel = (product.model || "").toLowerCase();
+
       const matchesSearch =
-        product.name
-          .toLowerCase()
-          .includes(search) ||
-        product.brand
-          .toLowerCase()
-          .includes(search) ||
-        product.model
-          .toLowerCase()
-          .includes(search);
+        pName.includes(search) ||
+        pBrand.includes(search) ||
+        pModel.includes(search);
 
       const matchesCategory =
         categoryFilter === "All" ||
@@ -273,7 +286,7 @@ function Sales({
       return;
     }
 
-    const product = products.find(
+    const product = safeProducts.find(
       (product) =>
         product.id === productId
     );
@@ -328,7 +341,7 @@ function Sales({
       return;
     }
 
-    const product = products.find(
+    const product = safeProducts.find(
       (product) =>
         product.id === productId
     );
@@ -492,7 +505,7 @@ function Sales({
     }
 
     for (const item of saleItems) {
-      const product = products.find(
+      const product = safeProducts.find(
         (product) =>
           product.id === item.productId
       );
@@ -549,7 +562,7 @@ function Sales({
     ]);
 
     const updatedProducts =
-      products.map((product) => {
+      safeProducts.map((product) => {
         const soldItem =
           saleItems.find(
             (item) =>
@@ -772,7 +785,7 @@ function Sales({
         <br />
 
         <ProductList
-          products={products}
+          products={safeProducts}
           filteredProducts={
             filteredProducts
           }
@@ -808,7 +821,7 @@ function Sales({
           }
           disabled={
             customers.length === 0 ||
-            products.length === 0
+            safeProducts.length === 0
           }
         >
           New Sale
@@ -821,7 +834,7 @@ function Sales({
           </p>
         )}
 
-        {products.length === 0 && (
+        {safeProducts.length === 0 && (
           <p>
             Add a product before
             creating a sale.
@@ -831,7 +844,7 @@ function Sales({
         {showSaleForm && (
           <SaleForm
             customers={customers}
-            products={products}
+            products={safeProducts}
             saleCustomerId={
               saleCustomerId
             }

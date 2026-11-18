@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "./services/api";
+
+
 
 import {
   BrowserRouter,
@@ -119,20 +122,176 @@ const defaultServiceCatalog = [
   },
 ];
 
+const defaultInitialProducts = [
+  {
+    id: "dc5931b2-ba99-4f9d-a3d6-bdc7d8b1db05",
+    name: "Kent Grand Plus RO+UV+UF",
+    type: "Complete RO",
+    category: "Complete RO",
+    purchasePrice: 12000,
+    sellingPrice: 15500,
+    price: 15500,
+    currentStock: 8,
+    minimumStock: 3,
+    images: [{ url: "/coverpage.png" }],
+    is_active: true,
+  },
+  {
+    id: "71d2effa-6f8f-4390-856a-f506f84e9d52",
+    name: "Aquaguard Marvel RO+UV",
+    type: "Complete RO",
+    category: "Complete RO",
+    purchasePrice: 10500,
+    sellingPrice: 13999,
+    price: 13999,
+    currentStock: 6,
+    minimumStock: 3,
+    images: [{ url: "/coverpage.png" }],
+    is_active: true,
+  },
+  {
+    id: "317faf12-6718-4b41-b966-344b6377278a",
+    name: "RO Sediment & Carbon Filter Kit",
+    type: "Spare Part",
+    category: "Spare Parts",
+    purchasePrice: 380,
+    sellingPrice: 650,
+    price: 650,
+    currentStock: 24,
+    minimumStock: 10,
+    images: [],
+    is_active: true,
+  },
+  {
+    id: "c541b90a-548b-42a9-9384-c58c073223f0",
+    name: "Vontron RO Membrane 75 GPD",
+    type: "Spare Part",
+    category: "Spare Parts",
+    purchasePrice: 750,
+    sellingPrice: 1200,
+    price: 1200,
+    currentStock: 4,
+    minimumStock: 5,
+    images: [],
+    is_active: true,
+  },
+];
+
 function App() {
   /* ================================
-     SHARED BUSINESS DATA
+     SHARED BUSINESS DATA (WITH LOCAL PERSISTENCE)
      ================================ */
 
-  const [customers, setCustomers] = useState([]);
-  const [services, setServices] = useState([]);
+  const [customers, setCustomers] = useState(() => {
+    try {
+      const saved = localStorage.getItem("nirmal_customers");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [services, setServices] = useState(() => {
+    try {
+      const saved = localStorage.getItem("nirmal_services");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [serviceCatalog, setServiceCatalog] =
     useState(defaultServiceCatalog);
 
-  const [products, setProducts] = useState([]);
-  const [sales, setSales] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem("nirmal_products");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback below
+    }
+    return defaultInitialProducts;
+  });
+
+  const [sales, setSales] = useState(() => {
+    try {
+      const saved = localStorage.getItem("nirmal_sales");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem("nirmal_orders");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Sync state to localStorage whenever items change
+  useEffect(() => {
+    localStorage.setItem("nirmal_customers", JSON.stringify(customers));
+  }, [customers]);
+
+  useEffect(() => {
+    localStorage.setItem("nirmal_services", JSON.stringify(services));
+  }, [services]);
+
+  useEffect(() => {
+    localStorage.setItem("nirmal_sales", JSON.stringify(sales));
+  }, [sales]);
+
+  useEffect(() => {
+    localStorage.setItem("nirmal_orders", JSON.stringify(orders));
+  }, [orders]);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      localStorage.setItem("nirmal_products", JSON.stringify(products));
+    }
+  }, [products]);
+
+  // Fetch products from backend API, merging with defaults without overwriting with empty list
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.products.getAll();
+        if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+          setProducts((currentProducts) => {
+            const normalized = response.data.map((item) => {
+              const existing = currentProducts.find((p) => p.id === item.id);
+              return {
+                id: item.id,
+                name: item.name,
+                type: item.type || (item.category?.toLowerCase().includes("spare") ? "Spare Part" : "Complete RO"),
+                category: item.category || "General",
+                purchasePrice: Number(item.purchasePrice ?? existing?.purchasePrice ?? Math.round((item.price ?? 0) * 0.7)),
+                sellingPrice: Number(item.sellingPrice ?? item.price ?? existing?.sellingPrice ?? 0),
+                price: Number(item.price ?? item.sellingPrice ?? 0),
+                currentStock: Number(item.currentStock ?? existing?.currentStock ?? 10),
+                minimumStock: Number(item.minimumStock ?? existing?.minimumStock ?? 5),
+                images: Array.isArray(item.images) ? item.images : (existing?.images || []),
+                is_active: item.is_active !== false,
+              };
+            });
+            localStorage.setItem("nirmal_products", JSON.stringify(normalized));
+            return normalized;
+          });
+        }
+      } catch (error) {
+        console.warn("API products fetch fallback:", error.message);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
 
   /* ================================
      CUSTOMER WEBSITE STATE
